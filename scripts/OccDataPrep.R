@@ -44,7 +44,7 @@ rm( list = ls() )
 getwd()
 
 # Install new packages from "CRAN" repository. # 
-install.packages( "tidyverse" ) #actually a collection of packages 
+# install.packages( "tidyverse" ) #actually a collection of packages 
 
 # load packages:
 library( tidyverse ) 
@@ -101,7 +101,7 @@ I; yrrange; T; J
     # Select obs_df:
 closeddf <- obs_df %>% 
     #filter only rows for last year:
-    dplyr::filter( year == yrrange[T] ) %>%
+    dplyr::filter( year == 2015 ) %>%
     #select desired columns to keep:
     dplyr::select( o.sites, year, pres.j1, pres.j2, pres.j3,
             observer.j1, observer.j2, observer.j3 ) 
@@ -111,7 +111,7 @@ head( closeddf ); dim( closeddf )
 ### For homework modify above to choose a different year #
 ## so that you can compare how inference changes from year to year #
 # Which year did you choose?
-# Answer:
+# Answer: 2015
 # 
 
 # How many detections per survey day across the 100 sites?
@@ -136,15 +136,20 @@ head( preddf ); dim( preddf )
 # Before including predictors in a model you should check their distribution 
 # and correlation and/or collinearity among them 
 # Why?
-# Answer: 
-#
+# Answer: We wanted the predictors to be well distributed-- if all the values for a predictor are the
+# same across all observations, it won't tell us much. We also want to look for large gaps in our predictor values 
+# we also want to check for multicollinearity between predictors because if they are highly correlated then that makes it hard to 
+# interpret the relationships between predictors and the response variable
 
 # One way to easily loop over just some of the columns in your dataframe is 
 # to create a vector with predictor names
 
 # Why don't we just index column order e.g. preddf[,c(2,3)]
-# Answer:
-# 
+# Answer: Indexing by column position instead of the predictor names is not good practice because it is not sensitive to
+# changes you might make in the dataframe structure such as adding, deleting, widening, or rearranging variable locations within the dataframe.
+# Using names in the code also makes the code easier to follow if you are reading it over again because you can clearly see which variables 
+# you are working with
+
 prednames <- c("cheatgrass", "sagebrush", "Feb.minT", "AprMay.maxT" )
 
 # Note that your predictors are in wide format. You can 
@@ -161,7 +166,7 @@ for( p in 1:length(prednames) ){
 }
 
 # What do you note? Any apparent issues with these predictors?
-# Answer:
+# Answer: some of the predictors have gaps in the spread of values like February mean temperature
 #
 
 # Let's plot how predictors vary annually:
@@ -186,8 +191,10 @@ for( p in 1:length(prednames) ){
   print( cp )
 }
 # What do you note for each predictor?
-# Answer:
-#
+# Answer: looking at the temperature variables: 2007, 2011, and 2016 were very cold years; 
+# land cover: cheat grass and sagebrush cover varied between sites but seemed to stay consistent at some sites across years
+# and the overall average grass and sagebrush cover across all sites seemed to vary annually but consistently there was higher average cheatgrass cover
+# than sagebrush across sites
 
 # Now check for correlation among predictors:
 cor( preddf[ , prednames] )
@@ -195,7 +202,7 @@ cor( preddf[ , prednames] )
 # Why is this important?
 # Are there any predictors we need to worry about?
 # What correlations would be worrisome?
-# Answers: 
+# Answers: using 0.6/-0.6 as a benchmark, there don't seem to be any sets of variables that are highly correlated 
 #
 
 ### end predictor check ----------------
@@ -241,11 +248,11 @@ colSums( is.na( opendf[, prednames]) )
 ################################################################
 ##########    save relevant data and workspaces     ###########
 #save closed dataframe in our data folder:
-write.csv( closeddf, paste( getwd(),"/Data/closedf.csv", sep = "" ),  
+write.csv( closeddf, paste( getwd(),"/data/class_examples/closedf.csv", sep = "" ),  
            row.names = FALSE )
 
 #save open dataframe in our data folder:
-write.csv( opendf, paste( getwd(),"/Data/opendf.csv", sep = "" ),  
+write.csv( opendf, paste( getwd(),"/data/class_examples/opendf.csv", sep = "" ),  
            row.names = FALSE )
 
 # For homework save the clean data to your data folder, as you will be
@@ -255,9 +262,17 @@ write.csv( opendf, paste( getwd(),"/Data/opendf.csv", sep = "" ),
 # Examples of how to save figures:
 # Save the most recently viewed plot with ggsave() to define file type, 
 #resolution, and plot dimensions:
-# ggsave("Data/AprMayTXYear.png", dpi=500, 
-#        height = 10, width = 15, units= "cm" )
-# 
+
+# saving 
+ggplot( preddf, aes( x = year, y = sagebrush ) ) +
+  theme_bw( base_size = 15 ) + #choose a preset theme
+  labs( y = "% Sagebrush", x = "Year" ) + #label x axis using our predictor names
+  geom_smooth( size = 2 ) #smooth mean across all sites
+
+
+ggsave("data/class_examples/data_vis/sagebrush_year.png", dpi=500,
+       height = 10, width = 15, units= "cm" )
+
 # # or if you saved it as an object:
 # #start by calling the file where you will save it
 # tiff( 'Data/FebTXYear.tiff',
@@ -273,8 +288,10 @@ write.csv( opendf, paste( getwd(),"/Data/opendf.csv", sep = "" ),
 #save.image( "DataPrepWorkspace.RData" )
 
 # Why may you want to save a workspace?
-# Answer:
-# 
+# Answer: saving a work space allows you to continue where you left off without having to rerun previous code
+# which saves time if some things take a long time to run and prevents mistakes if you quickly rerun things and make an error 
+# or have inadvertently changed or moved things in the meantime
+
 ########## End of saving section ##################################
 ################## Save your data and workspace ###################
 
